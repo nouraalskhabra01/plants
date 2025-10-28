@@ -2,205 +2,82 @@
 //  Untitled.swift
 //  plants
 //
-//  Created by noura on 20/10/2025.
+//  Created by noura on 27/10/2025.
 //
 import SwiftUI
-import UserNotifications
 
-struct SheetView: View {
-    @Environment(\.dismiss) var dismiss
-    @Binding var plants: [Plant]
-
-    @State private var plantName = ""
-    @State private var selectedRoom = "Bedroom"
-    @State private var selectedLight = "Full sun"
-    @State private var selectedWatering = "Every day"
-    @State private var selectedWater = "20–50 ml"
-
-    let rooms = ["Bedroom", "Living Room", "Kitchen", "Balcony", "Bathroom"]
-    let lights = ["Full sun", "Partial sun", "Low light"]
-    let wateringDays = ["Every day", "Every 2 days", "Every 3 days", "Once a week", "Every 10 days", "Every 2 weeks"]
-    let waterAmounts = ["20–50 ml", "50–100 ml", "100–200 ml", "200–300 ml"]
-
-    @State private var goToToday = false
-    @State private var testMode = true // لتجربة الإشعار السريع
+struct ContentView: View {
+    @StateObject private var viewModel = PlantViewModel()
+    @State private var showSheet = false
+    @State private var navigateToToday = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color("sheet").ignoresSafeArea()
+                Color.black.ignoresSafeArea()
 
-                VStack(spacing: 25) {
-                    // الشريط العلوي
-                    HStack {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                                .frame(width: 42, height: 42)
-                                .background(Color.black.opacity(0.25))
-                                .clipShape(Circle())
-                        }
+                VStack(spacing: 20) {
+                    Text("My Plants 🌱")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 16)
+                        .padding(.top, 40)
 
-                        Spacer()
+                    Rectangle()
+                        .fill(Color.gray)
+                        .frame(height: 0.5)
+                        .padding(.horizontal, 16)
 
-                        Text("Set Reminder")
-                            .font(.title3.bold())
-                            .foregroundColor(.white)
+                    Spacer()
+                    
+                    Image("plants")
+                        .resizable()
+                        .frame(width: 164, height: 200)
+                        .padding(.top, 20)
 
-                        Spacer()
+                    Text("Start your plant journey!")
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundColor(.white)
 
-                        Button(action: {
-                            // إنشاء نبتة جديدة
-                            let newPlant = Plant(
-                                name: plantName.isEmpty ? "Pothos" : plantName,
-                                room: selectedRoom,
-                                light: selectedLight,
-                                water: selectedWater,
-                                watering: selectedWatering,
-                                lastWatered: nil
-                            )
-
-                            // إضافة النبتة للقائمة
-                            plants.append(newPlant)
-
-                            // طلب إذن الإشعارات وجدولة الإشعار
-                            NotificationManager.shared.requestPermission()
-                            NotificationManager.shared.scheduleNotification(for: newPlant, testMode: testMode)
-
-                            goToToday = true
-                        }) {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                                .frame(width: 42, height: 42)
-                                .background(Color.green)
-                                .clipShape(Circle())
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 25)
-
-                    Spacer().frame(height: 15)
-
-                    // المحتوى
-                    VStack(spacing: 45) {
-                        // Plant Name
-                        HStack(spacing: 20) {
-                            Text("Plant Name")
-                                .foregroundColor(.white)
-
-                            ZStack(alignment: .leading) {
-                                if plantName.isEmpty {
-                                    Text("Pothos")
-                                        .foregroundColor(.white.opacity(0.5))
-                                }
-                                TextField("", text: $plantName)
-                                    .foregroundColor(.white.opacity(0.8))
-                                    .frame(maxWidth: .infinity)
-                            }
-                        }
-                        .padding()
-                        .frame(height: 60)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(30)
-                        .padding(.horizontal, 20)
-
-                        // Room & Light
-                        VStack(spacing: 10) {
-                            HStack {
-                                Label("Room", systemImage: "paperplane")
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Menu {
-                                    ForEach(rooms, id: \.self) { room in
-                                        Button(room) { selectedRoom = room }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(selectedRoom)
-                                        Image(systemName: "chevron.down")
-                                    }
-                                    .foregroundColor(.white.opacity(0.8))
-                                }
-                            }
-                            Divider().background(Color.white.opacity(0.2))
-                            HStack {
-                                Label("Light", systemImage: "sun.max")
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Menu {
-                                    ForEach(lights, id: \.self) { light in
-                                        Button(light) { selectedLight = light }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(selectedLight)
-                                        Image(systemName: "chevron.down")
-                                    }
-                                    .foregroundColor(.white.opacity(0.8))
-                                }
-                            }
-                        }
-                        .padding()
-                        .frame(height: 95)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(30)
-                        .padding(.horizontal, 20)
-
-                        // Watering Days & Water
-                        VStack(spacing: 10) {
-                            HStack {
-                                Label("Watering Days", systemImage: "drop")
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Menu {
-                                    ForEach(wateringDays, id: \.self) { day in
-                                        Button(day) { selectedWatering = day }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(selectedWatering)
-                                        Image(systemName: "chevron.down")
-                                    }
-                                    .foregroundColor(.white.opacity(0.8))
-                                }
-                            }
-                            Divider().background(Color.white.opacity(0.2))
-                            HStack {
-                                Label("Water", systemImage: "drop.fill")
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Menu {
-                                    ForEach(waterAmounts, id: \.self) { amount in
-                                        Button(amount) { selectedWater = amount }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(selectedWater)
-                                        Image(systemName: "chevron.down")
-                                    }
-                                    .foregroundColor(.white.opacity(0.8))
-                                }
-                            }
-                        }
-                        .padding()
-                        .frame(height: 95)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(30)
-                        .padding(.horizontal, 20)
-                    }
+                    Text("Now all your plants will be in one place and we will help you take care of them :)🪴")
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
 
                     Spacer()
 
-                    NavigationLink("", destination: TodayReminder(plants: $plants), isActive: $goToToday)
+                    Button("Set Plant Reminder") {
+                        showSheet = true
+                    }
+                    .font(.system(size: 20))
+                    .frame(width: 280, height: 42)
+                    .background(Color("cyan"))
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
+                    .padding(.bottom, 100)
+
+                    NavigationLink(
+                        destination: TodayReminder(viewModel: viewModel),
+                        isActive: $navigateToToday
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
                 }
             }
-            .navigationBarBackButtonHidden(true)
+            .sheet(isPresented: $showSheet) {
+                SheetView(viewModel: viewModel) {
+                    showSheet = false
+                    navigateToToday = true
+                }
+            }
         }
     }
 }
 
 #Preview {
-    SheetView(plants: .constant([]))
+    ContentView()
 }
+
