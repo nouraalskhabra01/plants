@@ -5,7 +5,7 @@ Plants 🌱
 is your ultimate companion for organizing, tracking, and caring for your indoor plants. Designed to make plant care easy, enjoyable, and stress-free, this app ensures that every plant in your home thrives.
 
 
-With My Plants 🌱, you can:
+With Plants 🌱, you can:
 
 1- Add and manage your plants: Keep all your indoor plants in one place.
 Add their names, location in your home, light requirements, watering schedule, and water amount.
